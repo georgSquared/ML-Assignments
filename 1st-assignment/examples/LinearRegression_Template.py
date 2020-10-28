@@ -19,8 +19,10 @@
 # =============================================================================
 
 # IMPORT NECESSARY LIBRARIES HERE
-
-
+from sklearn import datasets, metrics, linear_model, model_selection
+from scipy import stats
+from matplotlib import pyplot
+import numpy
 # =============================================================================
 
 
@@ -30,7 +32,7 @@
 # =============================================================================
 
 # ADD COMMAND TO LOAD DATA HERE
-diabetes = 
+diabetes = datasets.load_diabetes()
 
 # =============================================================================
 
@@ -42,8 +44,8 @@ diabetes =
 # Load just 1 feature for simplicity and visualization purposes...
 # X: features
 # Y: target value (prediction target)
-X = diabetes.data[:, np.newaxis, 2]
-y = 
+X = diabetes.data[:, numpy.newaxis, 2]  # Here we load the bmi feature (?)
+y = diabetes.target
 
 # =============================================================================
 
@@ -56,7 +58,7 @@ y =
 
 
 # ADD COMMAND TO CREATE LINEAR REGRESSION MODEL HERE
-linearRegressionModel = 
+linearRegressionModel = linear_model.LinearRegression()
 
 
 # =============================================================================
@@ -71,7 +73,7 @@ linearRegressionModel =
 # so that each run of the script always produces the same results (highly recommended).
 # Apart from the train_test_function, this parameter is present in many routines and should be
 # used whenever possible.
-x_train, x_test, y_train, y_test =
+x_train, x_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.25, random_state=0)
 
 
 
@@ -79,7 +81,7 @@ x_train, x_test, y_train, y_test =
 # =============================================================================
 
 # ADD COMMAND TO TRAIN YOUR MODEL HERE
-
+linearRegressionModel.fit(x_train, y_train)
 # =============================================================================
 
 
@@ -89,7 +91,7 @@ x_train, x_test, y_train, y_test =
 # =============================================================================
 
 # ADD COMMAND TO MAKE A PREDICTION HERE
-y_predicted = 
+y_predicted = linearRegressionModel.predict(x_test)
 
 # =============================================================================
 
@@ -103,9 +105,12 @@ y_predicted =
 # =============================================================================
 
 # ADD COMMANDS TO EVALUATE YOUR MODEL HERE (AND PRINT ON CONSOLE)
-print()
-print()
-print()
+correlation = stats.spearmanr(y_test, y_predicted)
+mean_squared_error = metrics.mean_squared_error(y_test, y_predicted)
+r2_score = metrics.r2_score(y_test, y_predicted)
+print(f'Correlation: {correlation.correlation:.2f}')
+print(f'Mean Squared Error: {mean_squared_error:.2f}')
+print(f'R2 Score: {r2_score:.2f}')
 
 # =============================================================================
 
@@ -115,14 +120,21 @@ print()
 # Plot results in a 2D plot (scatter() plot, line plot())
 # =============================================================================
 
-# ADD COMMANDS FOR VISUALIZING DATA (SCATTER PLOT) AND REGRESSION MODEL 
+# ADD COMMANDS FOR VISUALIZING DATA (SCATTER PLOT) AND REGRESSION MODEL
+pyplot.scatter(x_test, y_test,  color='red')
+pyplot.plot(x_test, y_predicted, color='black')
+
+pyplot.xticks(())
+pyplot.yticks(())
+
+pyplot.show()
 
 
 # Display 'ticks' in x-axis and y-axis
-plt.xticks()
-plt.yticks()
+pyplot.xticks()
+pyplot.yticks()
 
 # Show plot
-plt.show()
+pyplot.show()
 
 # =============================================================================
