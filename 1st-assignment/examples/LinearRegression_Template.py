@@ -127,9 +127,6 @@ pyplot.plot(x_test, y_predicted, color='black')
 pyplot.xticks(())
 pyplot.yticks(())
 
-pyplot.show()
-
-
 # Display 'ticks' in x-axis and y-axis
 pyplot.xticks()
 pyplot.yticks()
