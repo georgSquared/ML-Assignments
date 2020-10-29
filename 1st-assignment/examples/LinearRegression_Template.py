@@ -105,11 +105,16 @@ y_predicted = linearRegressionModel.predict(x_test)
 # =============================================================================
 
 # ADD COMMANDS TO EVALUATE YOUR MODEL HERE (AND PRINT ON CONSOLE)
-correlation = stats.spearmanr(y_test, y_predicted)
+spearman_correlation = stats.spearmanr(y_test, y_predicted)
+print(f'Spearman Correlation: {spearman_correlation.correlation:.2f}')
+
+pearson_correlation = stats.pearsonr(y_test, y_predicted)
+print(f'Pearson Correlation: {pearson_correlation[0]:.2f}')
+
 mean_squared_error = metrics.mean_squared_error(y_test, y_predicted)
-r2_score = metrics.r2_score(y_test, y_predicted)
-print(f'Correlation: {correlation.correlation:.2f}')
 print(f'Mean Squared Error: {mean_squared_error:.2f}')
+
+r2_score = metrics.r2_score(y_test, y_predicted)
 print(f'R2 Score: {r2_score:.2f}')
 
 # =============================================================================
@@ -123,9 +128,6 @@ print(f'R2 Score: {r2_score:.2f}')
 # ADD COMMANDS FOR VISUALIZING DATA (SCATTER PLOT) AND REGRESSION MODEL
 pyplot.scatter(x_test, y_test,  color='red')
 pyplot.plot(x_test, y_predicted, color='black')
-
-pyplot.xticks(())
-pyplot.yticks(())
 
 # Display 'ticks' in x-axis and y-axis
 pyplot.xticks()
