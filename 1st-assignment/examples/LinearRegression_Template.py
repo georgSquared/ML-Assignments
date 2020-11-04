@@ -136,4 +136,7 @@ pyplot.yticks()
 # Show plot
 pyplot.show()
 
+# Save the plot in a png
+pyplot.savefig('diabetes_scatter.png')
+
 # =============================================================================
