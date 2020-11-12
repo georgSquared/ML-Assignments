@@ -9,17 +9,27 @@ def load_data(file_name):
     return Orange.data.Table(file_name)
 
 
-def get_learner(ordered=True, evaluator="entropy"):
+def get_learner(beam_width, min_covered_examples, max_rule_length, learner_type=None):
     """
-    Get a single unparametrized learner
-    """
-    if ordered:
-        learner = Orange.classification.rules.CN2Learner()
-    else:
-        learner = Orange.classification.rules.CN2UnorderedLearner()
+    Return a single parametrized learner
 
-    if ordered and evaluator == "laplace":
+    :param learner_type: ["ordered", "unordered", "laplace"]
+    :return: the learner
+    :return:
+    """
+    if learner_type == "ordered":
+        learner = Orange.classification.rules.CN2Learner()
+    elif learner_type == "unordered":
+        learner = Orange.classification.rules.CN2Learner()
+    elif learner_type == "laplace":
+        learner = Orange.classification.rules.CN2UnorderedLearner()
         learner.rule_finder.quality_evaluator = Orange.classification.rules.LaplaceAccuracyEvaluator()
+    else:
+        raise ValueError("No learner type provided")
+
+    learner.rule_finder.search_algorithm.beam_width = beam_width
+    learner.rule_finder.general_validator.min_covered_examples = min_covered_examples
+    learner.rule_finder.general_validator.max_rule_length = max_rule_length
 
     return learner
 
@@ -96,12 +106,19 @@ def run_tests():
 
 
 def print_rules(params):
-    learner = None
+    data = load_data("wine.csv")
+    for learner_type in ["ordered", "unordered", "laplace"]:
+        learner = get_learner(*params[learner_type]["params"], learner_type=learner_type)
 
-    for rule in learner.rule_list:
-        print(rule)
+        classifier = learner(data)
+
+        print(f"Rules for {learner_type} learner")
+        for rule in classifier.rule_list:
+            print(rule)
 
 
 if __name__ == "__main__":
     best_params = run_tests()
+    print(best_params)
+
     print_rules(best_params)
