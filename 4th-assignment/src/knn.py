@@ -13,6 +13,15 @@ random.seed = 42
 np.random.seed(666)
 
 
+def pprint(d, indent=0):
+    for key, value in d.items():
+        print('\t' * indent + str(key))
+        if isinstance(value, dict):
+            pprint(value, indent + 1)
+        else:
+            print('\t' * (indent + 1) + str(value))
+
+
 def evaluate_model(actual, predicted, print_for_params=False):
     average = "macro"
     recall_score = metrics.recall_score(actual, predicted, average=average)
@@ -55,12 +64,14 @@ def preprocess_titanic_data(titanic_df, drop_age=False):
         axis=1
     )
 
-    # Merge SibSp(Siblings/Spouse) and Parch (Parents/Children) as Family
-    titanic_df["Family"] = titanic_df["SibSp"] + titanic_df["Parch"]
+    # Merge SibSp(Siblings/Spouse) and Parch (Parents/Children) as Family with a 1/0 value
+    # They essentially model the same thing, whether a passenger had someone to care for or not
+    titanic_df["Family"] = np.where((titanic_df["SibSp"] + titanic_df["Parch"]) > 0, 1, 0)
     titanic_df.drop(["SibSp", "Parch"], inplace=True, axis=1)
 
     # Substitute Sex and Embarked with numerical data
-    dummy_sex_embarked = pd.get_dummies(titanic_df, columns=['Sex', 'Embarked'], prefix=['Sex', 'Embarked'])
+    dummy_sex_embarked = pd.get_dummies(titanic_df, columns=['Sex', 'Embarked'], prefix=['Sex', 'Embarked'],
+                                        drop_first=True)
     titanic_df.drop(["Sex", "Embarked"], axis=1, inplace=True)
     titanic_df = pd.concat([titanic_df, dummy_sex_embarked], axis=1)
 
@@ -81,7 +92,7 @@ def normalize_data(train_data, test_data):
 
 
 def fill_data(train_data, test_data):
-    imputer = KNNImputer(n_neighbors=3)
+    imputer = KNNImputer(n_neighbors=3, weights='distance')
     imputer.fit(train_data)
     train = imputer.transform(train_data)
     test = imputer.transform(test_data)
@@ -93,7 +104,7 @@ def run_tests(x_train, x_test, y_train, y_test):
     neighbors = range(1, 200)
     metric = "minkowski"
     weights = ["uniform", "distance"]
-    p_params = [1, 2]
+    p_params = [1, 2, 3]
 
     results = {}
     for weight in weights:
@@ -152,13 +163,13 @@ def plot_results(imputed, non_imputed):
             plt.plot(
                 neighbors,
                 imputed[weight][p]["f1_list"],
-                label='with impute', color="black"
+                label='with impute', color="red"
             )
 
             plt.plot(
                 neighbors,
                 non_imputed[weight][p]["f1_list"],
-                label='without impute', color="red"
+                label='without impute', color="black"
             )
 
             plt.legend()
@@ -172,11 +183,10 @@ def plot_results(imputed, non_imputed):
 if __name__ == "__main__":
     print("Imputed Run")
     imputed_results = get_data(imputed=True)
-    print(json.dumps(imputed_results, indent=4))
+    pprint(imputed_results)
 
     print("Non-imputed Run")
     non_imputed_results = get_data(imputed=False)
-    print(json.dumps(non_imputed_results, indent=4))
+    pprint(non_imputed_results)
 
     plot_results(imputed_results, non_imputed_results)
-
